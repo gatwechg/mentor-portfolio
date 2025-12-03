@@ -1,92 +1,73 @@
-// ==================== Smooth Scrolling ==================== //
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.scrollIntoView({ behavior: 'smooth' });
-    }
-}
+// ==================== Contact Form Handler ==================== //
 
-// ==================== Form Submission Handler ==================== //
+// Handle form submission
 function handleFormSubmit(event) {
     event.preventDefault();
 
-    // Get form values
+    // Get form input values
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const message = document.getElementById('message').value.trim();
-    const formMessage = document.getElementById('form-message');
 
-    // Basic validation
+    // Validate inputs are not empty
     if (!name || !email || !message) {
-        showMessage('Please fill in all fields.', 'error');
+        displayMessage('Please fill in all fields.', 'error');
+        showAlert('⚠️ Error', 'Please fill in all fields.', 'error');
         return;
     }
 
-    // Email validation regex
+    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-        showMessage('Please enter a valid email address.', 'error');
+        displayMessage('Please enter a valid email address.', 'error');
+        showAlert('❌ Invalid Email', 'Please enter a valid email address.', 'error');
         return;
     }
 
-    // Simulate form submission (in real project, send to backend)
-    console.log('Form Data:', { name, email, message });
-    showMessage('Message sent successfully! Thank you for reaching out.', 'success');
+    // Log form data (in production, send to backend)
+    console.log('Contact Form Submitted:', { name, email, message });
 
-    // Reset form
+    // Show success messages
+    displayMessage('Message sent successfully! Thank you for reaching out.', 'success');
+    showAlert('✅ Success', `Thank you, ${name}! Your message has been sent successfully.`, 'success');
+
+    // Clear form fields
     document.querySelector('.contact-form').reset();
 }
 
-// ==================== Display Form Message ==================== //
-function showMessage(text, type) {
+// Display inline message below form
+function displayMessage(text, type) {
     const formMessage = document.getElementById('form-message');
     formMessage.textContent = text;
     formMessage.className = `form-message ${type}`;
-    
-    // Clear message after 5 seconds
+
+    // Auto-clear message after 5 seconds
     setTimeout(() => {
         formMessage.textContent = '';
         formMessage.className = 'form-message';
     }, 5000);
 }
 
-// ==================== Navigation Active State ==================== //
-document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.nav-links a');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            // Remove active class from all links
-            navLinks.forEach(l => l.classList.remove('active'));
-            // Add active class to clicked link
-            this.classList.add('active');
-        });
-    });
+// Display alert notification (browser-style or custom)
+function showAlert(title, message, type) {
+    // Create alert container
+    const alertContainer = document.createElement('div');
+    alertContainer.className = `alert alert-${type}`;
+    alertContainer.innerHTML = `
+        <div class="alert-content">
+            <strong>${title}</strong>
+            <p>${message}</p>
+            <button class="alert-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
 
-    // Update active nav link based on scroll position
-    window.addEventListener('scroll', function() {
-        let current = '';
-        const sections = document.querySelectorAll('section');
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            if (pageYOffset >= sectionTop - 200) {
-                current = section.getAttribute('id');
-            }
-        });
+    // Insert alert at top of page
+    document.body.insertBefore(alertContainer, document.body.firstChild);
 
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
-    });
-});
-
-// ==================== Smooth Scroll on Page Load ==================== //
-window.addEventListener('load', function() {
-    // Optional: Add any animations or initialization here
-    console.log('Portfolio loaded successfully!');
-});
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        if (alertContainer.parentElement) {
+            alertContainer.remove();
+        }
+    }, 4000);
+}
